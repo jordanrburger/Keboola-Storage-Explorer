@@ -1,0 +1,4 @@
+streamlit
+pandas-profiling==2.10.0
+streamlit-pandas-profiling==0.1.1
+git+https://github.com/keboola/sapi-python-client.git
