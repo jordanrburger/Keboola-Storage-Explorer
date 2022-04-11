@@ -7,7 +7,11 @@ import kbcstorage as kbc
 from kbcstorage.client import Client
 from st_aggrid import AgGrid, GridOptionsBuilder
 from st_aggrid.shared import GridUpdateMode
-
+import plotly.express as px
+import datetime as dt
+from prophet import Prophet
+from prophet.diagnostics import cross_validation, performance_metrics
+from prophet.plot import plot_cross_validation_metric
 
     
 # Web App Title
@@ -41,19 +45,19 @@ st.session_state['client'] = Client(connection_url, api_token)
 #    st.sidebar.error('Could not connect to Keboola Storage')
 with st.sidebar.header('Select a bucket from storage'):
     def get_buckets():
-        buckets = st.session_state['client'].buckets.list()
-        buckets_df = pd.DataFrame(buckets)
-        bucket = st.sidebar.selectbox('Bucket', buckets_df['name'])
-        bucket_id = buckets_df[buckets_df['name'] == bucket]['id'].values[0]
-        return bucket_id
-    bucket_id = get_buckets()
+        st.session_state['buckets'] = st.session_state['client'].buckets.list()
+        st.session_state['buckets_df'] = pd.DataFrame(st.session_state['buckets'])
+        st.session_state['bucket'] = st.sidebar.selectbox('Bucket', st.session_state['buckets_df']['name'])
+        st.session_state['bucket_id'] = st.session_state['buckets_df'][st.session_state['buckets_df']['name'] == st.session_state['bucket']]['id'].values[0]
+        return st.session_state['bucket_id']
+    st.session_state['bucket_id'] = get_buckets()
     
 with st.sidebar.header('Select a table from the bucket'):
                 # Select a table from the bucket
     def get_tables():
-        tables = st.session_state['client'].buckets.list_tables(bucket_id=bucket_id)
+        st.session_state['tables'] = st.session_state['client'].buckets.list_tables(bucket_id=st.session_state['bucket_id'])
 
-        tables_df = pd.DataFrame(tables)
+        tables_df = pd.DataFrame(st.session_state['tables'])
         table = st.sidebar.selectbox('Table', tables_df['name'])
         table_id = tables_df[tables_df['name'] == table]['id'].values[0]
         return table_id
@@ -202,6 +206,7 @@ with st.expander("Forecasting Area"):
             st.write(df)
             today = dt.datetime.today()
             today = pd.to_datetime(today)
+            today = today.strftime('%Y-%m-%d')
             df = df.query('ds <= @today')
             m = Prophet(seasonality_mode=seasonality,
                         changepoint_prior_scale=changepoint_prior_scale, changepoint_range=changepoint_range)
