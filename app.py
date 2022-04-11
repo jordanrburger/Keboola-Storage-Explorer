@@ -32,11 +32,11 @@ with st.sidebar.markdown('''
 
 # Enter your Keboola Storage connection details
  connection_url = st.sidebar.selectbox('Connection URL', ['https://connection.keboola.com/', 'https://connection.north-europe.azure.keboola.com/', 'https://connection.eu-central-1.keboola.com/'])
- api_token = st.sidebar.text_input('API Token', 'Enter Password', type="password")
+ st.session_state['api_token'] = st.sidebar.text_input('API Token', 'Enter Password', type="password")
 # Create a Keboola Storage Client
 #click to connect
 
-st.session_state['client'] = Client(connection_url, api_token)
+st.session_state['client'] = Client(connection_url, st.session_state['api_token'] )
 #client = Client(connection_url, api_token)
 #try:
 #    client.buckets.list()
@@ -63,9 +63,9 @@ with st.sidebar.header('Select a table from the bucket'):
         return table_id
     id = get_tables()
     
-    uploaded_file = st.session_state['client'].tables.export_to_file(table_id=id, path_name='.')
+    st.session_state['uploaded_file'] = st.session_state['client'].tables.export_to_file(table_id=id, path_name='.')
     
-query_df = pd.read_csv(uploaded_file)
+query_df = pd.read_csv(st.session_state['uploaded_file'] )
 ########################################################################################################################
 ######################################### INTERACTIVE TABLE ############################################################
 st.header("📊 Explore")
@@ -106,7 +106,7 @@ with st.expander("More Options"):
     with st.container():
         st.download_button(  # add a download button
             label="Download data as CSV",
-            data=uploaded_file,
+            data=st.session_state['uploaded_file'] ,
             mime='text/csv',
         )
         if st.button('Generate Pandas Profiling Report'):    # add a button to the sidebar
