@@ -1,6 +1,6 @@
 streamlit
-pandas-profiling==2.10.0
-streamlit-pandas-profiling==0.1.1
+pandas-profiling
+streamlit-pandas-profiling
 git+https://github.com/keboola/sapi-python-client.git
 streamlit-aggrid
 click==8
