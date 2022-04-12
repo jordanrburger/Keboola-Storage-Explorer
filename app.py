@@ -29,14 +29,19 @@ with st.sidebar.markdown('''
 # Enter your Keboola Storage connection details
 '''):
 
-
 # Enter your Keboola Storage connection details
- connection_url = st.sidebar.selectbox('Connection URL', ['https://connection.keboola.com/', 'https://connection.north-europe.azure.keboola.com/', 'https://connection.eu-central-1.keboola.com/'])
+ st.session_state['connection_url'] = st.sidebar.selectbox('Connection URL', ['https://connection.keboola.com/', 'https://connection.north-europe.azure.keboola.com/', 'https://connection.eu-central-1.keboola.com/'])
  st.session_state['api_token'] = st.sidebar.text_input('API Token', 'Enter Password', type="password")
 # Create a Keboola Storage Client
 #click to connect
 
-st.session_state['client'] = Client(connection_url, st.session_state['api_token'] )
+if st.sidebar.button('Connect'):
+    if 'client' not in st.session_state:
+        st.session_state['client'] = Client(st.session_state['connection_url'], st.session_state['api_token'])
+        st.success('Connected to Keboola Storage')
+    else:
+        st.sidebar.button('Disconnect', on_click=lambda: st.session_state.pop('client'))
+          
 #client = Client(connection_url, api_token)
 #try:
 #    client.buckets.list()
